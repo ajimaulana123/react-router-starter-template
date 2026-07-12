@@ -16,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "absensi-pesantren",
-      "database_id": "local-dev-db-id"
+      "database_id": "8e2ef17e-104d-4207-9a68-482e0f05f9c0"
     }
   ]
 }

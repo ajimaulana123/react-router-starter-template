@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Form, useLoaderData, useFetcher, useNavigation } from 'react-router';
+import { useState, useEffect } from 'react';
+import { Form, useLoaderData, useFetcher, useNavigation, useSearchParams } from 'react-router';
 import type { Route } from './+types/absensi';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllJadwal, getSantriByKelas, getAbsensiByJadwalTanggal, batchCreateAbsensi } from '~/lib/db';
@@ -54,7 +54,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 export default function AbsensiPage({ loaderData }: Route.ComponentProps) {
   const { user, jadwal, today } = loaderData;
-  const [selectedJadwalId, setSelectedJadwalId] = useState<number | null>(null);
+  const [searchParams] = useSearchParams();
+  const initialJadwalId = searchParams.get('jadwal_id');
+  const [selectedJadwalId, setSelectedJadwalId] = useState<number | null>(
+    initialJadwalId ? Number(initialJadwalId) : null
+  );
   const [selectedTanggal, setSelectedTanggal] = useState(today);
   const [santri, setSantri] = useState<SantriWithKelas[]>([]);
   const [existingAbsensi, setExistingAbsensi] = useState<AbsensiWithSantri[]>([]);
@@ -65,6 +69,13 @@ export default function AbsensiPage({ loaderData }: Route.ComponentProps) {
   const fetcher = useFetcher();
 
   const selectedJadwal = jadwal.find((j) => j.id === selectedJadwalId);
+
+  // Auto-load when page opens with ?jadwal_id=X from dashboard ustadz
+  useEffect(() => {
+    if (selectedJadwalId) {
+      handleJadwalSelect(selectedJadwalId);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch santri data via API route when jadwal changes
   async function handleJadwalSelect(jadwalId: number) {

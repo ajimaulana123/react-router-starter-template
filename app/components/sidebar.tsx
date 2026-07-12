@@ -19,7 +19,13 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: '📊',
-    roles: ['admin', 'ustadz'],
+    roles: ['admin'],
+  },
+  {
+    label: 'Dashboard',
+    href: '/dashboard/ustadz',
+    icon: '📊',
+    roles: ['ustadz'],
   },
   {
     label: 'Santri',
@@ -43,6 +49,12 @@ const navItems: NavItem[] = [
     label: 'Mata Pelajaran',
     href: '/mapel',
     icon: '📖',
+    roles: ['admin'],
+  },
+  {
+    label: 'Wali Santri',
+    href: '/wali',
+    icon: '👪',
     roles: ['admin'],
   },
   {

@@ -11,19 +11,24 @@ export default [
   route("login", "routes/login.tsx"),
   route("logout", "routes/logout.ts"),
 
-  // Main app routes (no layout wrapper - each page handles its own layout)
+  // Dashboards
   route("dashboard", "routes/dashboard.tsx"),
+  route("dashboard/ustadz", "routes/dashboard.ustadz.tsx"),
 
   // CRUD Master Data
   route("santri", "routes/santri.tsx"),
   route("ustadz", "routes/ustadz.tsx"),
   route("kelas", "routes/kelas.tsx"),
   route("mapel", "routes/mapel.tsx"),
+  route("wali", "routes/wali.tsx"),
 
   // Jadwal & Absensi
   route("jadwal", "routes/jadwal.tsx"),
   route("absensi", "routes/absensi.tsx"),
   route("laporan", "routes/laporan.tsx"),
+
+  // Portal Wali
+  route("portal-wali", "routes/portal-wali.tsx"),
 
   // API / Data routes
   route("absensi/data", "routes/absensi.data.ts"),

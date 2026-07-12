@@ -549,6 +549,30 @@ export async function createJadwal(
   return (await getJadwalById(db, id)) as unknown as Jadwal;
 }
 
+export async function updateJadwal(
+  db: D1Database,
+  id: number,
+  data: Partial<JadwalCreate>,
+): Promise<JadwalWithRelations | null> {
+  const fields: string[] = [];
+  const params: unknown[] = [];
+
+  if (data.ustadz_id !== undefined) { fields.push('ustadz_id = ?'); params.push(data.ustadz_id); }
+  if (data.mapel_id !== undefined) { fields.push('mapel_id = ?'); params.push(data.mapel_id); }
+  if (data.kelas_id !== undefined) { fields.push('kelas_id = ?'); params.push(data.kelas_id); }
+  if (data.hari !== undefined) { fields.push('hari = ?'); params.push(data.hari); }
+  if (data.jam_masuk !== undefined) { fields.push('jam_masuk = ?'); params.push(data.jam_masuk); }
+  if (data.jam_keluar !== undefined) { fields.push('jam_keluar = ?'); params.push(data.jam_keluar); }
+
+  if (fields.length === 0) return getJadwalById(db, id);
+
+  fields.push("updated_at = datetime('now')");
+  params.push(id);
+
+  await execute(db, `UPDATE jadwal SET ${fields.join(', ')} WHERE id = ?`, params);
+  return getJadwalById(db, id);
+}
+
 export async function deleteJadwal(
   db: D1Database,
   id: number,
@@ -656,6 +680,28 @@ export async function getAllWaliSantri(
   );
 }
 
+export async function getWaliSantriById(
+  db: D1Database,
+  id: number,
+): Promise<WaliSantri | null> {
+  return queryFirst<WaliSantri>(
+    db,
+    'SELECT * FROM wali_santri WHERE id = ?',
+    [id],
+  );
+}
+
+export async function getWaliSantriBySantriId(
+  db: D1Database,
+  santriId: number,
+): Promise<WaliSantri[]> {
+  return queryAll<WaliSantri>(
+    db,
+    'SELECT * FROM wali_santri WHERE santri_id = ?',
+    [santriId],
+  );
+}
+
 export async function createWaliSantri(
   db: D1Database,
   data: WaliSantriCreate,
@@ -666,7 +712,37 @@ export async function createWaliSantri(
     [data.nama, data.kontak ?? null, data.hubungan ?? null, data.santri_id],
   );
   const id = result.meta.last_row_id;
-  return { id, ...data, kontak: data.kontak ?? null, hubungan: data.hubungan ?? null, created_at: '', updated_at: '' };
+  return getWaliSantriById(db, id) as unknown as WaliSantri;
+}
+
+export async function updateWaliSantri(
+  db: D1Database,
+  id: number,
+  data: Partial<WaliSantriCreate>,
+): Promise<WaliSantri | null> {
+  const fields: string[] = [];
+  const params: unknown[] = [];
+
+  if (data.nama !== undefined) { fields.push('nama = ?'); params.push(data.nama); }
+  if (data.kontak !== undefined) { fields.push('kontak = ?'); params.push(data.kontak); }
+  if (data.hubungan !== undefined) { fields.push('hubungan = ?'); params.push(data.hubungan); }
+  if (data.santri_id !== undefined) { fields.push('santri_id = ?'); params.push(data.santri_id); }
+
+  if (fields.length === 0) return getWaliSantriById(db, id);
+
+  fields.push("updated_at = datetime('now')");
+  params.push(id);
+
+  await execute(db, `UPDATE wali_santri SET ${fields.join(', ')} WHERE id = ?`, params);
+  return getWaliSantriById(db, id);
+}
+
+export async function deleteWaliSantri(
+  db: D1Database,
+  id: number,
+): Promise<boolean> {
+  const result = await execute(db, 'DELETE FROM wali_santri WHERE id = ?', [id]);
+  return (result.meta.changes ?? 0) > 0;
 }
 
 // ==================== DASHBOARD ====================

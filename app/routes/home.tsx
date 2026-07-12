@@ -16,7 +16,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const { user } = await getAuthUser(request, db, secret);
 
   if (user) {
-    return redirect("/dashboard");
+    // Role-aware redirect
+    if (user.role === 'admin') return redirect('/dashboard');
+    if (user.role === 'ustadz') return redirect('/dashboard/ustadz');
+    if (user.role === 'wali') return redirect('/portal-wali');
+    if (user.role === 'santri') return redirect('/portal-wali');
+    return redirect('/dashboard');
   }
 
   return redirect("/login");
