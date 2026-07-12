@@ -1,10 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Form,
   useLoaderData,
   useFetcher,
-  useNavigation,
-  useSearchParams,
 } from 'react-router';
 import type { Route } from './+types/santri';
 import { getAuthUser, requireRole } from '~/lib/auth';
@@ -92,6 +89,13 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
     setShowModal(false);
     setEditingSantri(null);
   }
+
+  // Auto-close modal after successful submit
+  useEffect(() => {
+    if (fetcher.state === 'idle' && fetcher.data?.success) {
+      closeModal();
+    }
+  }, [fetcher.state, fetcher.data]);
 
   return (
     <Layout user={user}>
@@ -279,9 +283,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                   <button
                     type="submit"
                     className="btn-primary"
-                    onClick={closeModal}
+                    disabled={fetcher.state === 'submitting'}
                   >
-                    {editingSantri ? 'Simpan Perubahan' : 'Tambah Santri'}
+                    {fetcher.state === 'submitting' ? '⏳ Menyimpan...' : (editingSantri ? 'Simpan Perubahan' : 'Tambah Santri')}
                   </button>
                 </div>
               </fetcher.Form>
@@ -323,9 +327,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                   <button
                     type="submit"
                     className="btn-danger"
-                    onClick={() => setConfirmDelete(null)}
+                    disabled={fetcher.state === 'submitting'}
                   >
-                    Ya, Hapus
+                    {fetcher.state === 'submitting' ? '⏳ Menghapus...' : 'Ya, Hapus'}
                   </button>
                 </fetcher.Form>
               </div>

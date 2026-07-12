@@ -16,7 +16,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const db = getDB(context);
   const { user } = await getAuthUser(request, db, secret);
 
-  requireRole(user, ['admin', 'ustadz']);
+  requireRole(user, ['admin']);
 
   const stats = await getDashboardStats(db);
 

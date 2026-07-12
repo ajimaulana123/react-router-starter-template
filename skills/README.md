@@ -21,6 +21,7 @@
 | `testing.md` | Test runner, struktur, mocking — auto-detect |
 | `git-conventions.md` | Git workflow, commit messages, branching |
 | `accessibility.md` | a11y best practices, ARIA, keyboard nav |
+| `e2e-testing.md` | End-to-end test scenarios untuk semua halaman — login, CRUD, absensi, laporan |
 
 ## ⚠️ Penting
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/mapel';
 import { getAuthUser, requireRole } from '~/lib/auth';
@@ -55,6 +55,10 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
   function openCreate() { setEditing(null); setShowModal(true); }
   function openEdit(m: MataPelajaran) { setEditing(m); setShowModal(true); }
   function closeModal() { setShowModal(false); setEditing(null); }
+
+  useEffect(() => {
+    if (fetcher.state === 'idle' && fetcher.data?.success) closeModal();
+  }, [fetcher.state, fetcher.data]);
 
   return (
     <Layout user={user}>
@@ -127,8 +131,8 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
                 </div>
                 <div className="modal-footer px-0 pb-0">
                   <button type="button" onClick={closeModal} className="btn-ghost">Batal</button>
-                  <button type="submit" className="btn-primary" onClick={closeModal}>
-                    {editing ? 'Simpan' : 'Tambah'}
+                  <button type="submit" className="btn-primary" disabled={fetcher.state === 'submitting'}>
+                    {fetcher.state === 'submitting' ? '⏳ Menyimpan...' : (editing ? 'Simpan' : 'Tambah')}
                   </button>
                 </div>
               </fetcher.Form>
@@ -148,7 +152,9 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
                 <fetcher.Form method="post">
                   <input type="hidden" name="intent" value="delete" />
                   <input type="hidden" name="id" value={confirmDelete.id} />
-                  <button type="submit" className="btn-danger" onClick={() => setConfirmDelete(null)}>Ya, Hapus</button>
+                  <button type="submit" className="btn-danger" disabled={fetcher.state === 'submitting'}>
+                    {fetcher.state === 'submitting' ? '⏳ Menghapus...' : 'Ya, Hapus'}
+                  </button>
                 </fetcher.Form>
               </div>
             </div>
