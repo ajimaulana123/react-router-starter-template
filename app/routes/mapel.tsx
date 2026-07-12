@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/mapel';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllMataPelajaran, createMataPelajaran, updateMataPelajaran, deleteMataPelajaran } from '~/lib/db';
 import { Layout } from '~/components/layout';
+import { Toast } from '~/components/toast';
 import type { MataPelajaran } from '~/lib/types';
 
 export function meta({}: Route.MetaArgs) {
@@ -56,8 +57,19 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
   function openEdit(m: MataPelajaran) { setEditing(m); setShowModal(true); }
   function closeModal() { setShowModal(false); setEditing(null); }
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.success) closeModal();
+    if (fetcher.state === 'idle' && fetcher.data?.success) {
+      closeModal();
+      const wasDelete = confirmDelete !== null;
+      setConfirmDelete(null);
+      setToast({
+        message: wasDelete ? 'Data berhasil dihapus!' : 'Data berhasil disimpan!',
+        type: 'success',
+      });
+    }
   }, [fetcher.state, fetcher.data]);
 
   return (
@@ -117,16 +129,16 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
                 {editing && <input type="hidden" name="id" value={editing.id} />}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">Kode</label>
-                    <input type="text" name="kode" className="form-input" required defaultValue={editing?.kode} />
+                    <label htmlFor="kode" className="form-label">Kode</label>
+                    <input id="kode" type="text" name="kode" className="form-input" required defaultValue={editing?.kode} />
                   </div>
                   <div>
-                    <label className="form-label">Nama</label>
-                    <input type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
+                    <label htmlFor="nama" className="form-label">Nama</label>
+                    <input id="nama" type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="form-label">Deskripsi</label>
-                    <textarea name="deskripsi" className="form-textarea" rows={2} defaultValue={editing?.deskripsi || ''} />
+                    <label htmlFor="deskripsi" className="form-label">Deskripsi</label>
+                    <textarea id="deskripsi" name="deskripsi" className="form-textarea" rows={2} defaultValue={editing?.deskripsi || ''} />
                   </div>
                 </div>
                 <div className="modal-footer px-0 pb-0">
@@ -160,6 +172,8 @@ export default function MapelPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        <Toast message={toast?.message ?? null} type={toast?.type} onClose={closeToast} />
       </div>
     </Layout>
   );

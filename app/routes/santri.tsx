@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
-import {
-  useLoaderData,
-  useFetcher,
-} from 'react-router';
+import { useState, useEffect, useCallback } from 'react';
+import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/santri';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllSantri, createSantri, updateSantri, deleteSantri, getAllKelas } from '~/lib/db';
 import { Layout } from '~/components/layout';
-import type { UserPublic, SantriWithKelas, KelasWithWali } from '~/lib/types';
+import { Toast } from '~/components/toast';
+import type { SantriWithKelas } from '~/lib/types';
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: 'Data Santri — Web Absensi Pesantren' }];
@@ -90,10 +88,19 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
     setEditingSantri(null);
   }
 
-  // Auto-close modal after successful submit
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
+  // Auto-close modals + show toast after successful submit
   useEffect(() => {
     if (fetcher.state === 'idle' && fetcher.data?.success) {
       closeModal();
+      const wasDelete = confirmDelete !== null;
+      setConfirmDelete(null);
+      setToast({
+        message: wasDelete ? 'Data berhasil dihapus!' : 'Data berhasil disimpan!',
+        type: 'success',
+      });
     }
   }, [fetcher.state, fetcher.data]);
 
@@ -115,6 +122,7 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
         {/* Search */}
         <div className="mb-4">
           <input
+            id="search-santri"
             type="text"
             placeholder="Cari santri berdasarkan nama atau NIS..."
             className="form-input max-w-md"
@@ -207,8 +215,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">NIS</label>
+                    <label htmlFor="nis" className="form-label">NIS</label>
                     <input
+                      id="nis"
                       type="text"
                       name="nis"
                       className="form-input"
@@ -217,8 +226,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                     />
                   </div>
                   <div>
-                    <label className="form-label">Nama Lengkap</label>
+                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
                     <input
+                      id="nama"
                       type="text"
                       name="nama"
                       className="form-input"
@@ -227,8 +237,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                     />
                   </div>
                   <div>
-                    <label className="form-label">Kelas</label>
+                    <label htmlFor="kelas_id" className="form-label">Kelas</label>
                     <select
+                      id="kelas_id"
                       name="kelas_id"
                       className="form-select"
                       required
@@ -243,8 +254,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                     </select>
                   </div>
                   <div>
-                    <label className="form-label">Status</label>
+                    <label htmlFor="status" className="form-label">Status</label>
                     <select
+                      id="status"
                       name="status"
                       className="form-select"
                       defaultValue={editingSantri?.status || 'aktif'}
@@ -254,8 +266,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="form-label">Alamat</label>
+                    <label htmlFor="alamat" className="form-label">Alamat</label>
                     <textarea
+                      id="alamat"
                       name="alamat"
                       className="form-textarea"
                       rows={2}
@@ -263,8 +276,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="form-label">No. Telepon Wali</label>
+                    <label htmlFor="no_telp_wali" className="form-label">No. Telepon Wali</label>
                     <input
+                      id="no_telp_wali"
                       type="text"
                       name="no_telp_wali"
                       className="form-input"
@@ -336,6 +350,9 @@ export default function SantriPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        {/* Toast Notification */}
+        <Toast message={toast?.message ?? null} type={toast?.type} onClose={closeToast} />
       </div>
     </Layout>
   );

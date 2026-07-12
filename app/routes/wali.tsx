@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/wali';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllWaliSantri, getAllSantri, createWaliSantri, updateWaliSantri, deleteWaliSantri } from '~/lib/db';
 import { Layout } from '~/components/layout';
+import { Toast } from '~/components/toast';
 import type { WaliSantriWithSantri } from '~/lib/types';
 
 export function meta({}: Route.MetaArgs) {
@@ -65,8 +66,19 @@ export default function WaliPage({ loaderData }: Route.ComponentProps) {
   function openEdit(w: WaliSantriWithSantri) { setEditing(w); setShowModal(true); }
   function closeModal() { setShowModal(false); setEditing(null); }
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.success) closeModal();
+    if (fetcher.state === 'idle' && fetcher.data?.success) {
+      closeModal();
+      const wasDelete = confirmDelete !== null;
+      setConfirmDelete(null);
+      setToast({
+        message: wasDelete ? 'Data berhasil dihapus!' : 'Data berhasil disimpan!',
+        type: 'success',
+      });
+    }
   }, [fetcher.state, fetcher.data]);
 
   return (
@@ -80,7 +92,7 @@ export default function WaliPage({ loaderData }: Route.ComponentProps) {
           <button onClick={openCreate} className="btn-primary">+ Tambah Wali</button>
         </div>
 
-        <input type="text" placeholder="Cari wali atau nama santri..." className="form-input max-w-md mb-4"
+        <input id="search-wali" type="text" placeholder="Cari wali atau nama santri..." className="form-input max-w-md mb-4"
           value={search} onChange={(e) => setSearch(e.target.value)} />
 
         <div className="table-container">
@@ -131,16 +143,16 @@ export default function WaliPage({ loaderData }: Route.ComponentProps) {
                 {editing && <input type="hidden" name="id" value={editing.id} />}
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="form-label">Nama Wali</label>
-                    <input type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
+                    <label htmlFor="nama" className="form-label">Nama Wali</label>
+                    <input id="nama" type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
                   </div>
                   <div>
-                    <label className="form-label">Kontak (No. HP)</label>
-                    <input type="text" name="kontak" className="form-input" defaultValue={editing?.kontak || ''} />
+                    <label htmlFor="kontak" className="form-label">Kontak (No. HP)</label>
+                    <input id="kontak" type="text" name="kontak" className="form-input" defaultValue={editing?.kontak || ''} />
                   </div>
                   <div>
-                    <label className="form-label">Hubungan</label>
-                    <select name="hubungan" className="form-select" defaultValue={editing?.hubungan || ''}>
+                    <label htmlFor="hubungan" className="form-label">Hubungan</label>
+                    <select id="hubungan" name="hubungan" className="form-select" defaultValue={editing?.hubungan || ''}>
                       <option value="">Pilih Hubungan</option>
                       <option value="Ayah">Ayah</option>
                       <option value="Ibu">Ibu</option>
@@ -153,8 +165,8 @@ export default function WaliPage({ loaderData }: Route.ComponentProps) {
                     </select>
                   </div>
                   <div>
-                    <label className="form-label">Santri</label>
-                    <select name="santri_id" className="form-select" required defaultValue={editing?.santri_id}>
+                    <label htmlFor="santri_id" className="form-label">Santri</label>
+                    <select id="santri_id" name="santri_id" className="form-select" required defaultValue={editing?.santri_id}>
                       <option value="">Pilih Santri</option>
                       {santri.map(s => (
                         <option key={s.id} value={s.id}>{s.nama} ({s.nis})</option>
@@ -193,6 +205,8 @@ export default function WaliPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        <Toast message={toast?.message ?? null} type={toast?.type} onClose={closeToast} />
       </div>
     </Layout>
   );

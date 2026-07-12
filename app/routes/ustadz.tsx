@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/ustadz';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllUstadz, createUstadz, updateUstadz, deleteUstadz } from '~/lib/db';
 import { Layout } from '~/components/layout';
+import { Toast } from '~/components/toast';
 import type { Ustadz } from '~/lib/types';
 
 export function meta({}: Route.MetaArgs) {
@@ -60,8 +61,19 @@ export default function UstadzPage({ loaderData }: Route.ComponentProps) {
   function openEdit(u: Ustadz) { setEditing(u); setShowModal(true); }
   function closeModal() { setShowModal(false); setEditing(null); }
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.success) closeModal();
+    if (fetcher.state === 'idle' && fetcher.data?.success) {
+      closeModal();
+      const wasDelete = confirmDelete !== null;
+      setConfirmDelete(null);
+      setToast({
+        message: wasDelete ? 'Data berhasil dihapus!' : 'Data berhasil disimpan!',
+        type: 'success',
+      });
+    }
   }, [fetcher.state, fetcher.data]);
 
   return (
@@ -129,24 +141,24 @@ export default function UstadzPage({ loaderData }: Route.ComponentProps) {
                 {editing && <input type="hidden" name="id" value={editing.id} />}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">NIP</label>
-                    <input type="text" name="nip" className="form-input" required defaultValue={editing?.nip} />
+                    <label htmlFor="nip" className="form-label">NIP</label>
+                    <input id="nip" type="text" name="nip" className="form-input" required defaultValue={editing?.nip} />
                   </div>
                   <div>
-                    <label className="form-label">Nama Lengkap</label>
-                    <input type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
+                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
+                    <input id="nama" type="text" name="nama" className="form-input" required defaultValue={editing?.nama} />
                   </div>
                   <div>
-                    <label className="form-label">Kontak</label>
-                    <input type="text" name="kontak" className="form-input" defaultValue={editing?.kontak || ''} />
+                    <label htmlFor="kontak" className="form-label">Kontak</label>
+                    <input id="kontak" type="text" name="kontak" className="form-input" defaultValue={editing?.kontak || ''} />
                   </div>
                   <div>
-                    <label className="form-label">Bidang</label>
-                    <input type="text" name="bidang" className="form-input" defaultValue={editing?.bidang || ''} />
+                    <label htmlFor="bidang" className="form-label">Bidang</label>
+                    <input id="bidang" type="text" name="bidang" className="form-input" defaultValue={editing?.bidang || ''} />
                   </div>
                   <div>
-                    <label className="form-label">Status</label>
-                    <select name="status" className="form-select" defaultValue={editing?.status || 'aktif'}>
+                    <label htmlFor="status" className="form-label">Status</label>
+                    <select id="status" name="status" className="form-select" defaultValue={editing?.status || 'aktif'}>
                       <option value="aktif">Aktif</option>
                       <option value="tidak_aktif">Tidak Aktif</option>
                     </select>
@@ -183,6 +195,8 @@ export default function UstadzPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        <Toast message={toast?.message ?? null} type={toast?.type} onClose={closeToast} />
       </div>
     </Layout>
   );

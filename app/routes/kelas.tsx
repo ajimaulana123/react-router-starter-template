@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/kelas';
 import { getAuthUser, requireRole } from '~/lib/auth';
 import { getDB, getAllKelas, createKelas, updateKelas, deleteKelas, getAllUstadz } from '~/lib/db';
 import { Layout } from '~/components/layout';
+import { Toast } from '~/components/toast';
 import type { KelasWithWali } from '~/lib/types';
 
 export function meta({}: Route.MetaArgs) {
@@ -66,8 +67,19 @@ export default function KelasPage({ loaderData }: Route.ComponentProps) {
   function openEdit(k: KelasWithWali) { setEditing(k); setShowModal(true); }
   function closeModal() { setShowModal(false); setEditing(null); }
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.success) closeModal();
+    if (fetcher.state === 'idle' && fetcher.data?.success) {
+      closeModal();
+      const wasDelete = confirmDelete !== null;
+      setConfirmDelete(null);
+      setToast({
+        message: wasDelete ? 'Data berhasil dihapus!' : 'Data berhasil disimpan!',
+        type: 'success',
+      });
+    }
   }, [fetcher.state, fetcher.data]);
 
   return (
@@ -134,16 +146,16 @@ export default function KelasPage({ loaderData }: Route.ComponentProps) {
                 <input type="hidden" name="intent" value={editing ? 'update' : 'create'} />
                 {editing && <input type="hidden" name="id" value={editing.id} />}
                 <div>
-                  <label className="form-label">Nama Kelas</label>
-                  <input type="text" name="nama_kelas" className="form-input" required defaultValue={editing?.nama_kelas} />
+                  <label htmlFor="nama_kelas" className="form-label">Nama Kelas</label>
+                  <input id="nama_kelas" type="text" name="nama_kelas" className="form-input" required defaultValue={editing?.nama_kelas} />
                 </div>
                 <div>
-                  <label className="form-label">Tingkat</label>
-                  <input type="text" name="tingkat" className="form-input" defaultValue={editing?.tingkat || ''} placeholder="Contoh: 1, 2, 3 atau A, B, C" />
+                  <label htmlFor="tingkat" className="form-label">Tingkat</label>
+                  <input id="tingkat" type="text" name="tingkat" className="form-input" defaultValue={editing?.tingkat || ''} placeholder="Contoh: 1, 2, 3 atau A, B, C" />
                 </div>
                 <div>
-                  <label className="form-label">Wali Kelas</label>
-                  <select name="wali_kelas_id" className="form-select" defaultValue={editing?.wali_kelas_id || ''}>
+                  <label htmlFor="wali_kelas_id" className="form-label">Wali Kelas</label>
+                  <select id="wali_kelas_id" name="wali_kelas_id" className="form-select" defaultValue={editing?.wali_kelas_id || ''}>
                     <option value="">Pilih Wali Kelas</option>
                     {ustadz.map((u) => (
                       <option key={u.id} value={u.id}>{u.nama}</option>
@@ -186,6 +198,8 @@ export default function KelasPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
         )}
+
+        <Toast message={toast?.message ?? null} type={toast?.type} onClose={closeToast} />
       </div>
     </Layout>
   );
