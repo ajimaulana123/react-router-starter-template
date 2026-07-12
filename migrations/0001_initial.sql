@@ -1,0 +1,122 @@
+-- Migration 0001: Initial schema for Web Absensi Pesantren
+-- Execute with: wrangler d1 migrations apply absensi-pesantren --remote
+
+-- Users table for authentication (multi-role)
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK(role IN ('admin', 'ustadz', 'santri', 'wali')),
+  santri_id INTEGER,
+  ustadz_id INTEGER,
+  wali_id INTEGER,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Kelas (classes/grades)
+CREATE TABLE IF NOT EXISTS kelas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama_kelas TEXT NOT NULL,
+  tingkat TEXT,
+  wali_kelas_id INTEGER,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (wali_kelas_id) REFERENCES ustadz(id)
+);
+
+-- Ustadz (teachers)
+CREATE TABLE IF NOT EXISTS ustadz (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nip TEXT UNIQUE NOT NULL,
+  nama TEXT NOT NULL,
+  kontak TEXT,
+  bidang TEXT,
+  status TEXT DEFAULT 'aktif' CHECK(status IN ('aktif', 'tidak_aktif')),
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Santri (students)
+CREATE TABLE IF NOT EXISTS santri (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nis TEXT UNIQUE NOT NULL,
+  nama TEXT NOT NULL,
+  kelas_id INTEGER NOT NULL,
+  alamat TEXT,
+  no_telp_wali TEXT,
+  status TEXT DEFAULT 'aktif' CHECK(status IN ('aktif', 'alumni')),
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (kelas_id) REFERENCES kelas(id)
+);
+
+-- Mata Pelajaran (subjects)
+CREATE TABLE IF NOT EXISTS mata_pelajaran (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kode TEXT UNIQUE NOT NULL,
+  nama TEXT NOT NULL,
+  deskripsi TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Jadwal (schedule)
+CREATE TABLE IF NOT EXISTS jadwal (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ustadz_id INTEGER NOT NULL,
+  mapel_id INTEGER NOT NULL,
+  kelas_id INTEGER NOT NULL,
+  hari TEXT NOT NULL,
+  jam_masuk TEXT NOT NULL,
+  jam_keluar TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (ustadz_id) REFERENCES ustadz(id),
+  FOREIGN KEY (mapel_id) REFERENCES mata_pelajaran(id),
+  FOREIGN KEY (kelas_id) REFERENCES kelas(id)
+);
+
+-- Absensi (attendance records)
+CREATE TABLE IF NOT EXISTS absensi (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  santri_id INTEGER NOT NULL,
+  jadwal_id INTEGER NOT NULL,
+  tanggal TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('hadir', 'sakit', 'izin', 'alpa')),
+  catatan TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (santri_id) REFERENCES santri(id),
+  FOREIGN KEY (jadwal_id) REFERENCES jadwal(id),
+  UNIQUE(santri_id, jadwal_id, tanggal)
+);
+
+-- Wali Santri (parents/guardians)
+CREATE TABLE IF NOT EXISTS wali_santri (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kontak TEXT,
+  hubungan TEXT,
+  santri_id INTEGER NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (santri_id) REFERENCES santri(id)
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_santri_kelas ON santri(kelas_id);
+CREATE INDEX IF NOT EXISTS idx_santri_status ON santri(status);
+CREATE INDEX IF NOT EXISTS idx_absensi_santri ON absensi(santri_id);
+CREATE INDEX IF NOT EXISTS idx_absensi_jadwal ON absensi(jadwal_id);
+CREATE INDEX IF NOT EXISTS idx_absensi_tanggal ON absensi(tanggal);
+CREATE INDEX IF NOT EXISTS idx_jadwal_ustadz ON jadwal(ustadz_id);
+CREATE INDEX IF NOT EXISTS idx_jadwal_kelas ON jadwal(kelas_id);
+CREATE INDEX IF NOT EXISTS idx_jadwal_hari ON jadwal(hari);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_wali_santri ON wali_santri(santri_id);
+
+-- Seed: default admin (password will be set by seed script)
+INSERT OR IGNORE INTO users (username, email, password_hash, role)
+VALUES ('admin', 'admin@pesantren.local', '', 'admin');

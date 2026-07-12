@@ -1,16 +1,335 @@
 @import "tailwindcss" source(".");
 
 @theme {
-	--font-sans:
-		"Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Brand Colors - Hijau Islami */
+  --color-primary: #0D6B3E;
+  --color-primary-hover: #0A5A33;
+  --color-primary-active: #074A2A;
+  --color-primary-light: #E8F5EF;
+  --color-primary-medium: #1B8A5A;
+
+  /* Accent - Emas Nusantara */
+  --color-accent: #C8963E;
+  --color-accent-light: #FDF5E6;
+
+  /* Background */
+  --color-bg-page: #F8F9FA;
+  --color-bg-surface: #FFFFFF;
+
+  /* Text */
+  --color-text-primary: #1A1D23;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+
+  /* Border */
+  --color-border-primary: #D1D5DB;
+  --color-border-secondary: #E5E7EB;
+
+  /* Semantic Colors */
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 9999px;
 }
 
 html,
 body {
-	@apply bg-white dark:bg-gray-950;
+  @apply bg-[#F8F9FA] text-[#1A1D23] font-sans;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-	@media (prefers-color-scheme: dark) {
-		color-scheme: dark;
-	}
+/* ====================
+   Scrollbar Styling
+   ==================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* ====================
+   Card Component
+   ==================== */
+.card {
+  @apply bg-white border border-[#E5E7EB] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-5;
+}
+
+.card-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.card-title {
+  @apply text-lg font-semibold text-[#1A1D23];
+}
+
+/* ====================
+   Status Badges
+   ==================== */
+.badge-hadir {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#D1FAE5] text-[#065F46];
+}
+
+.badge-sakit {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#DBEAFE] text-[#1E40AF];
+}
+
+.badge-izin {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3C7] text-[#92400E];
+}
+
+.badge-alpa {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEE2E2] text-[#991B1B];
+}
+
+.badge-aktif {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#D1FAE5] text-[#065F46];
+}
+
+.badge-alumni {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F4F6] text-[#6B7280];
+}
+
+/* ====================
+   Table Styling
+   ==================== */
+.table-container {
+  @apply overflow-x-auto rounded-[12px] border border-[#E5E7EB];
+}
+
+table.data-table {
+  @apply w-full text-sm bg-white;
+}
+
+table.data-table thead {
+  @apply bg-[#0D6B3E] text-white;
+}
+
+table.data-table thead th {
+  @apply px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider;
+}
+
+table.data-table tbody tr {
+  @apply border-b border-[#E5E7EB] transition-colors duration-150;
+}
+
+table.data-table tbody tr:nth-child(even) {
+  @apply bg-[#F8F9FA];
+}
+
+table.data-table tbody tr:hover {
+  @apply bg-[#E8F5EF];
+}
+
+table.data-table tbody td {
+  @apply px-4 py-3 text-sm;
+}
+
+/* ====================
+   Form Styling
+   ==================== */
+.form-input {
+  @apply w-full px-3.5 py-2.5 bg-white border border-[#D1D5DB] rounded-[8px] text-sm text-[#1A1D23] placeholder-[#9CA3AF] transition-all duration-200;
+}
+
+.form-input:focus {
+  @apply outline-none border-[#0D6B3E] ring-2 ring-[#0D6B3E]/20;
+}
+
+.form-input.error {
+  @apply border-[#DC2626] ring-2 ring-[#DC2626]/20;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-[#1A1D23] mb-1.5;
+}
+
+.form-select {
+  @apply w-full px-3.5 py-2.5 bg-white border border-[#D1D5DB] rounded-[8px] text-sm text-[#1A1D23] placeholder-[#9CA3AF] transition-all duration-200 appearance-none cursor-pointer;
+}
+
+.form-select:focus {
+  @apply outline-none border-[#0D6B3E] ring-2 ring-[#0D6B3E]/20;
+}
+
+.form-textarea {
+  @apply w-full px-3.5 py-2.5 bg-white border border-[#D1D5DB] rounded-[8px] text-sm text-[#1A1D23] placeholder-[#9CA3AF] transition-all duration-200 resize-none min-h-[80px];
+}
+
+.form-textarea:focus {
+  @apply outline-none border-[#0D6B3E] ring-2 ring-[#0D6B3E]/20;
+}
+
+/* ====================
+   Button Styling
+   ==================== */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[#0D6B3E] text-white hover:bg-[#0A5A33] active:bg-[#074A2A];
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-[#0D6B3E] border-2 border-[#0D6B3E] hover:bg-[#E8F5EF];
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#1A1D23];
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[#DC2626] text-white hover:bg-[#B91C1C] active:bg-[#991B1B];
+}
+
+.btn-success {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[#059669] text-white hover:bg-[#047857];
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-xs;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-base;
+}
+
+/* ====================
+   Stat Card
+   ==================== */
+.stat-card {
+  @apply bg-white rounded-[12px] border border-[#E5E7EB] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)];
+}
+
+.stat-card .stat-icon {
+  @apply w-12 h-12 rounded-[10px] flex items-center justify-center text-xl;
+}
+
+.stat-card .stat-value {
+  @apply text-2xl font-bold text-[#1A1D23] mt-2;
+}
+
+.stat-card .stat-label {
+  @apply text-sm text-[#6B7280] mt-1;
+}
+
+/* ====================
+   Modal
+   ==================== */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4;
+}
+
+.modal-content {
+  @apply bg-white rounded-[12px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] w-full max-w-lg max-h-[90vh] overflow-y-auto;
+}
+
+.modal-header {
+  @apply flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB];
+}
+
+.modal-body {
+  @apply px-6 py-4;
+}
+
+.modal-footer {
+  @apply flex items-center justify-end gap-3 px-6 py-4 border-t border-[#E5E7EB];
+}
+
+/* ====================
+   Page Header
+   ==================== */
+.page-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+}
+
+.page-title {
+  @apply text-[28px] font-bold text-[#1A1D23] leading-tight;
+}
+
+.page-subtitle {
+  @apply text-sm text-[#6B7280] mt-1;
+}
+
+/* ====================
+   Loading & Empty States
+   ==================== */
+.loading-spinner {
+  @apply w-8 h-8 border-4 border-[#E5E7EB] border-t-[#0D6B3E] rounded-full animate-spin;
+}
+
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state .empty-icon {
+  @apply text-4xl mb-4 opacity-50;
+}
+
+.empty-state .empty-text {
+  @apply text-lg font-medium text-[#6B7280];
+}
+
+.empty-state .empty-subtext {
+  @apply text-sm text-[#9CA3AF] mt-1;
+}
+
+/* ====================
+   Animation
+   ==================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ====================
+   Toast / Alert
+   ==================== */
+.alert-success {
+  @apply px-4 py-3 rounded-[8px] text-sm font-medium bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0];
+}
+
+.alert-error {
+  @apply px-4 py-3 rounded-[8px] text-sm font-medium bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA];
+}
+
+.alert-warning {
+  @apply px-4 py-3 rounded-[8px] text-sm font-medium bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A];
+}
+
+.alert-info {
+  @apply px-4 py-3 rounded-[8px] text-sm font-medium bg-[#DBEAFE] text-[#1E40AF] border border-[#BFDBFE];
 }

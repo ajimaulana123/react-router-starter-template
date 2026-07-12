@@ -1,17 +1,27 @@
+import { redirect, data } from "react-router";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { getAuthUser } from "~/lib/auth";
+import { getDB } from "~/lib/db";
 
 export function meta({}: Route.MetaArgs) {
-	return [
-		{ title: "New React Router App" },
-		{ name: "description", content: "Welcome to React Router!" },
-	];
+  return [
+    { title: "Web Absensi Pesantren" },
+    { name: "description", content: "Sistem Absensi Digital Pondok Pesantren" },
+  ];
 }
 
-export function loader({ context }: Route.LoaderArgs) {
-	return { message: context.cloudflare.env.VALUE_FROM_CLOUDFLARE };
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const secret = context.cloudflare.env.JWT_SECRET || "absensi-pesantren-secret-key-2026";
+  const db = getDB(context);
+  const { user } = await getAuthUser(request, db, secret);
+
+  if (user) {
+    return redirect("/dashboard");
+  }
+
+  return redirect("/login");
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-	return <Welcome message={loaderData.message} />;
+export default function Home() {
+  return null;
 }
